@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="@lang;">
+<head append="src/views/head.html"></head>
+<body>
+	<header></header>
+	<nav import="src/views/navbar.html" class="navbar navbar-expand-lg navbar-light bg-light sticky-top"></nav>
+	<div id="steps" class="clearfix mb-2">
+		<div render="@startSession;" class="float-right">
+			<a href="/perfil.html"><i class="fas fa-user-graduate" title="@fullUserName;"></i></a>
+			<div class="btn-group ml-2">
+				<button type="button" class="btn btn-light dropdown-toggle simple" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Grupo 1</button>
+				<div class="dropdown-menu">
+					<a class="dropdown-item" href="#"><i class="fas fa-users-cog"></i> Grupo 1</a>
+					<a class="dropdown-item" href="#"><i class="fas fa-users-cog"></i> Grupo 2</a>
+					<a class="dropdown-item" href="#"><i class="fas fa-users-cog"></i> Grupo 3</a>
+					<div class="dropdown-divider"></div>
+					<a class="dropdown-item" href="/logout.html"><i class="fas fa-sign-out-alt"></i> @lblDesconectar;</a>
+				</div>
+			</div>
+		</div>
+		<ol class="breadcrumb small simple">
+			<li class="breadcrumb-item"><a href="/">@lblInicio;</a></li>
+			<li repeat="steps" class="breadcrumb-item"><![CDATA[<a href="@pref;">@text;</a>]]></li>
+		</ol>
+	</div>
+
+	<div id="alerts" class="container">
+		<div class="alert alert-success alert-dismissible fade show d-none" role="alert">
+			<img src="src/static/img/png/check.png" class="d-none-phone-l" /><span class="alert-text ml-2">@msgOk;</span>
+			<button type="button" class="close" data-dismiss="alert" aria-label="@lblCerrar;">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-primary alert-dismissible fade show d-none" role="alert">
+			<img src="src/static/img/png/info.png" width="48px" class="d-none-phone-l" /><span class="alert-text ml-2">@msgInfo;</span>
+			<button type="button" class="close" data-dismiss="alert" aria-label="@lblCerrar;">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-dismissible fade show d-none" role="alert">
+			<img src="src/static/img/png/warning.png" class="d-none-phone-l" /><span class="alert-text ml-2">@msgWarn;</span>
+			<button type="button" class="close" data-dismiss="alert" aria-label="@lblCerrar;">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-danger alert-dismissible fade show d-none" role="alert">
+			<img src="src/static/img/png/error.png" class="d-none-phone-l" /><span class="alert-text ml-2">@msgError;</span>
+			<button type="button" class="close" data-dismiss="alert" aria-label="@lblCerrar;">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	</div>
+
+	<aside import="@tplIzquierda;" class="@cssIzquierda;"></aside>
+	<section import="@tplSection;"></section>
+	<aside import="@tplDerecha;" class="@cssDerecha;"></aside>
+	<footer append="src/views/foot.html" class="footer mt-auto py-3"></footer>
+</body>
+</html>

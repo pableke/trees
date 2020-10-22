@@ -1,0 +1,37 @@
+
+<a class="navbar-brand" href="/">
+	<i class="d-inline-block align-items-center fas fa-tree"></i> HTML tree server
+</a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+	<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarContent">
+	<ul id="menu" class="navbar-nav mr-auto">
+		<li repeat="menus" id="@id_menu;" parent="@id_padre;" class="nav-item"><a href="@accion;" class="nav-link" disabled="@mu_mask;">@nombre;</a></li>
+		<!-- <li id="16" parent="4" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 11">Sub Nav Link 11</a></li>
+		<li id="17" parent="4" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 12">Sub Nav Link 12</a></li>
+		<li id="1" class="nav-item"><a href="/" class="nav-link" title="Nav Link 1">@lblInicio;</a></li>
+		<li id="2" class="nav-item"><a href="/login.html" class="nav-link" title="Nav Link 1">Login</a></li>
+		<li id="3" parent="2" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 1">Sub Nav Link 1</a></li>
+		<li id="4" parent="2" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 2">Sub Nav Link 2</a></li>
+		<li id="5" parent="2" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 3">Sub Nav Link 3</a></li>
+		<li id="6" parent="2" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 4">Sub Nav Link 4</a></li>
+		<li id="7" parent="2" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 5">Sub Nav Link 5</a></li>
+		<li id="8" class="nav-item"><a href="#header" class="nav-link" title="Nav Link 1">Header</a></li>
+		<li id="11" parent="8" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 6">Sub Nav Link 6</a></li>
+		<li id="12" parent="8" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 7">Sub Nav Link 7</a></li>
+		<li id="9" class="nav-item"><a href="#info-one" class="nav-link" title="Nav Link 1">About</a></li>
+		<li id="10" class="nav-item"><a href="#info-two" class="nav-link" title="Nav Link 1">Info 2</a></li>
+		<li id="13" parent="12" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 8">Sub Nav Link 8</a></li>
+		<li id="14" parent="12" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 9">Sub Nav Link 9</a></li>
+		<li id="15" parent="12" class="nav-item"><a href="#" class="nav-link" title="Sub Nav Link 10">Sub Nav Link 10</a></li> -->
+
+		<li class="nav-item">
+			<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+		</li>
+	</ul>
+	<form class="form-inline my-2 my-lg-0">
+		<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+		<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+	</form>
+</div>
