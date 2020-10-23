@@ -128,7 +128,6 @@ ATTR.append = function(root, parent, node, attrval) {
 	let data = fnReadFile(root, attrval);
 	fnRemoveAttr(node, "append", attrval); //remove append attribute
 	data && newText(node, format(data, root.data));
-console.log(node);
 	return true;
 }
 ATTR.repeat = function(root, parent, node, attrval) {
