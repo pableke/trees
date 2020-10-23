@@ -2,7 +2,7 @@
   "name": "trees",
   "version": "0.0.1",
   "description": "HTML DOM parser in server side",
-  "main": "index.js",
+  "main": "./src/trees.js",
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "zip": "rm uae.zip & npm-pack-zip",
@@ -19,5 +19,13 @@
   "devDependencies": {
     "nodemon": "^2.0.6",
     "npm-pack-zip": "^1.2.7"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pableke/trees.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pableke/trees/issues"
+  },
+  "homepage": "https://github.com/pableke/trees#readme"
 }
