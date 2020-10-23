@@ -37,6 +37,25 @@ function newNode(parent, name, value, type) { //new child out of tree
 function newText(parent, value) { //add child to tree
 	parent.childnodes.push(newNode(parent, "#text", value, TYPES.TEXT));
 	parent.valueHtml += value; //build outher html
+	return parent;
+}
+function fnAttributes(root, parent, node, nodes, attributes, parseChild) { //add child to tree
+	if (parseChild && attributes.length) { //exit recursion?
+		let fn = ATTR[attributes.shift()]; //read node value
+		if (fn) {
+			let value = attributes.splice(0, 2).pop(); //attrval
+			parseChild = fn(root, node, child, value.substr(1, value.length - 2), nodes); //cut handler?
+		}
+		fnAttributes(root, parent, node, attributes, parseChild);
+	}
+	else if (parseChild) {
+		node.childnodes.push(child); //push child
+		child.valueHtml += isEmptyElement ? "" : ("</" + child.name + ">"); //close child tag
+		node.valueHtml += child.valueHtml; //add child tag to parent
+		if (!attributes.length)
+			readNode(root, node, nodes); //go sibling
+	}
+	return node;
 }
 function readNode(root, node, nodes) { //tree
 	if (nodes.length) { //exit recursion?
@@ -54,7 +73,7 @@ function readNode(root, node, nodes) { //tree
 			let isEmptyElement = value.endsWith("/>") || (SELF_CLOSING_TAGS.indexOf(child.name) > -1);
 			isEmptyElement || readNode(root, child, nodes); //build tree in preorder
 			//execute attributes in postorder, when close element tag
-			for (let j = 0; parseChild && (j < attributes.length); j++) { //node attributes
+			/*for (let j = 0; parseChild && (j < attributes.length); j++) { //node attributes
 				let fn = ATTR[attributes[j]]; //attrname to function
 				if (fn) {
 					j += 2;
@@ -66,7 +85,8 @@ function readNode(root, node, nodes) { //tree
 				node.childnodes.push(child); //push child
 				child.valueHtml += isEmptyElement ? "" : ("</" + child.name + ">"); //close child tag
 				node.valueHtml += child.valueHtml; //add child tag to parent
-			}
+			}*/
+			fnAttributes(root, node, child, nodes, attributes, true);
 		}
 		else
 			newText(node, value); //default text
