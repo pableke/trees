@@ -46,7 +46,8 @@ const server = http.createServer(function(req, res) {
 		Object.assign(data, i18n[lang] || i18n[lang.substr(0, 2)] || i18n.es); //add values
 		data.lang = lang.substr(0, 2); //current language
 	}*/
-	trees.build(req, res).delete("startSession").render();
+	trees.init(req, res).delete("startSession").set("lang", "es")
+		.build().ready(value => {console.log("ready");res.html(value);});
 });
 
 //capture Node.js Signals and Events
