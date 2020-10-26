@@ -40,7 +40,7 @@ function newNode(root, parent, name, value, type, isEmpty, nodes, attributes) {
 	};
 }
 function newText(root, parent, value) { //add child to tree
-	let child = newNode(root, parent, "#text", value, TYPES.TEXT, true);
+	let child = newNode(root, parent, "#text", value, TYPES.TEXT, true, []);
 	child.nextAttr = child.nextNode; //has no attributes
 	parent.childnodes.push(child); //add child in array
 	parent.valueHtml += value; //build outher html
@@ -124,25 +124,25 @@ ATTR.render = function(root, parent, node, attrval) { //render node and subtree
 ATTR.remove = function(root, parent, node, attrval) { //remove node and subtree
 	boolval(attrval) ? node.nextNode() : node.nextAttr();
 }
-ATTR.root = function(root, parent, node, attrval, nodes) { //util to html ajax
+ATTR.root = function(root, parent, node, attrval) { //util to html ajax
 	fnRemoveAttr(node, "root", attrval);
 	if (boolval(attrval)) {
 		root.value = node.valueHtml + "</" + node.name + ">";
 		//remove root chilnodes and set node as unique child
 		root.childnodes.splice(0, root.childnodes.length - 1, node);
-		return !nodes.splice(0); //stop recursion
+		return node; //stop recursion
 	}
-	return true;
+	node.nextAttr();
 }
-ATTR.contents = function(root, parent, node, attrval, nodes) { //util to html ajax
+ATTR.contents = function(root, parent, node, attrval) { //util to html ajax
 	if (boolval(attrval)) {
 		root.value = node.valueHtml.substr(node.valueHtml.indexOf(">") + 1);
 		root.childnodes.splice(0); //remove root chilnodes
 		root.childnodes = node.childnodes; //update childnodes
-		return !nodes.splice(0); //stop recursion
+		return node; //stop recursion
 	}
 	fnRemoveAttr(node, "contents", attrval);
-	return true;
+	node.nextAttr();
 }
 ATTR.import = function(root, parent, node, attrval) {
 	fnLoadFile(root, fnRemoveAttr(node, "import", attrval), attrval); //add sub-tree
@@ -252,18 +252,7 @@ exports.init = function(req, res) {
 		return this;
 	}
 
-	/*res.logged = function() { return this.data.startSession; } //session exists
-	res.expired = function() { return ((this.data.sysdate - this.data.lastClick) > _maxage); }
-	res.startSession = function() { this.data.startSession = this.data.sysdate; return this; }
-	res.closeSession = function() { return this.delete("startSession"); }
-	res.getSessionHelper = function() { return this.dataHelper; }
-	res.setSessionHelper = function(fn, req) { //clear helper and call handler
-		this.sessionHelper = function() { delete this.dataHelper; fn(req, this); };
-		return this;
-	}*/
-
 	res.level = 0; //deep level
-	res.name = "#root"; //default name
 	res.childnodes = []; //child container
 	res.data = res.data || {}; //initialize data container
 	return res.reset().set("charset", _charset).copy("lastClick", "sysdate") //reset + prev click
