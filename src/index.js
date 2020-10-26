@@ -2,7 +2,6 @@
 //required node modeules
 const http = require("http"); //http server
 const url = require("url"); //url parser
-const path = require("path"); //file and directory paths
 const trees = require("./trees"); //server DOM parser
 
 // Settings
@@ -11,7 +10,7 @@ const trees = require("./trees"); //server DOM parser
 	"en": require("./i18n/en.js")
 };*/
 
-trees.start({ //sessions and views
+trees.start({
 	templateIndex: __dirname + "/views/index.html", //template index
 	staticage: 604800000, //default = 7dias
 	charset: "utf-8"
@@ -28,7 +27,6 @@ const server = http.createServer(function(req, res) {
 	res.setHeader("Access-Control-Allow-Credentials", true);
 
 	let parts = url.parse(req.url.toLowerCase(), true); //parse url
-
 	let pathname = parts.pathname; //https://example.org/abc/xyz?123 = /abc/xyz
 	//Static request => res.end()
 	if (pathname.indexOf("/favicon.ico") > -1)

@@ -1,4 +1,5 @@
 # Tree-Ss
+
 Build an HTML DOM in server side and response it to client.
 
 ## How It Works
@@ -10,7 +11,7 @@ Build an HTML DOM in server side and response it to client.
 
 ### JS Applications
 
-Express alternative
+An express alternative
 
 <details><summary><b>Show instructions</b></summary>
 
@@ -21,3 +22,30 @@ Express alternative
     ```
 
 </details>
+
+## Config
+
+Tree-Ss cahe index template, charset and static file age
+
+1. trees.start():
+
+	```
+	const trees = require("tree-ss"); //server DOM parser
+	trees.start({ //config charset and preload index template
+		templateIndex: __dirname + "/views/index.html", //template index
+		staticage: 604800000, //default = 7days
+		charset: "utf-8"
+	});
+	```
+
+2. trees.init(req, res):
+
+	```
+	trees.init(req, res).render();
+	```
+
+### test
+
+```
+npm test
+```
