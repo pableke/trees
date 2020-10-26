@@ -1,5 +1,5 @@
 {
-  "name": "trees",
+  "name": "tree-ss",
   "version": "0.0.1",
   "description": "HTML DOM parser in server side",
   "main": "./src/trees.js",

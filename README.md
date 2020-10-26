@@ -1,4 +1,4 @@
-# TreeS
+# Tree-Ss
 Build an HTML DOM in server side and response it to client.
 
 ## How It Works
