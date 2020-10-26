@@ -1,6 +1,7 @@
 
 //required node modeules and config
 const fs = require("fs"); //file system
+const path = require("path"); //file and directory paths
 const mt = require("./mime-ext"); //extensions mime-types
 
 //regexp to split nodes (auto remove coments multiline) and attributes from input string
@@ -31,22 +32,19 @@ function format(str, obj) { return str.replace(RE_VAR, function(m, k) { return n
 function parse(str, obj) { return str.replace(RE_VAR, function(m, k) { return nvl(obj[k], EMPTY); }); }
 
 //build and iterator tree
-function newNode(root, parent, name, value, type, isEmpty, nodes, attributes) {
+function newNode(parent, name, value, type, isEmpty) {
 	return { //new child node
 		name: name, valueHtml: value, type: type, 
-		level: parent.level + 1, isEmptyElement: isEmpty, childnodes: [],
-		nextAttr: function() { readAttrs(root, parent, this, nodes, attributes); },
-		nextNode: function() { readNode(root, parent, nodes); }
+		level: parent.level + 1, isEmptyElement: isEmpty, 
+		childnodes: []
 	};
 }
-function newText(root, parent, value) { //add child to tree
-	let child = newNode(root, parent, "#text", value, TYPES.TEXT, true, []);
-	child.nextAttr = child.nextNode; //has no attributes
-	parent.childnodes.push(child); //add child in array
+function newText(parent, value) { //add child to tree
+	parent.childnodes.push(newNode(parent, "#text", value, TYPES.TEXT, true));
 	parent.valueHtml += value; //build outher html
 	return parent;
 }
-function readAttrs(root, parent, node, nodes, attributes) {
+function readAttrs(root, parent, node, attributes) {
 	if (attributes.length) { //exit recursion?
 		let fn = ATTR[attributes.shift()]; //read attrname
 		if (fn) {
@@ -55,15 +53,15 @@ function readAttrs(root, parent, node, nodes, attributes) {
 			fn(root, parent, node, value.substr(1, value.length - 2));
 		}
 		else
-			readAttrs(root, parent, node, nodes, attributes);
+			readAttrs(root, parent, node, attributes);
 	}
 	else {
 		parent.childnodes.push(node); //push child
 		node.valueHtml += node.isEmptyElement ? "" : ("</" + node.name + ">"); //close child tag
 		parent.valueHtml += node.valueHtml; //add child tag to parent
-		readNode(root, parent, nodes); //go sibling
+		node.nextNode(); //go sibling
 	}
-	return parent;
+	return node;
 }
 function readNode(root, node, nodes) { //tree
 	if (nodes.length) { //exit recursion?
@@ -73,20 +71,22 @@ function readNode(root, node, nodes) { //tree
 		if (value.startsWith("</") || (value == "]]>"))
 			return node; //end element tag => close node
 		if (value.startsWith("<!") || value.startsWith("<?")) { //transform node to text
-			newText(root, node, value.startsWith("<![CDATA[") ? nodes.shift() : value);
+			newText(node, value.startsWith("<![CDATA[") ? nodes.shift() : value);
 			readNode(root, node, nodes); //go sibling
 		}
 		else if (value.startsWith("<")) { //new node element for tree
 			let attributes = value.match(RE_ATTRS); //node attributes
 			let name = attributes.shift(); //extract tag name
 			let isEmptyElement = value.endsWith("/>") || (SELF_CLOSING_TAGS.indexOf(name) > -1);
-			let child = newNode(root, node, name, value, TYPES.ELEMENT, isEmptyElement, nodes, attributes);
+			let child = newNode(node, name, value, TYPES.ELEMENT, isEmptyElement);
+			child.nextAttr = function() { readAttrs(root, node, child, attributes); }
+			child.nextNode = function() { readNode(root, node, nodes); }
 			isEmptyElement || readNode(root, child, nodes); //build tree in preorder
 			//execute attributes in postorder, when close element tag
-			readAttrs(root, node, child, nodes, attributes);
+			readAttrs(root, node, child, attributes);
 		}
 		else {
-			newText(root, node, value); //default text
+			newText(node, value); //default text
 			readNode(root, node, nodes); //go sibling
 		}
 	}
@@ -151,7 +151,7 @@ ATTR.import = function(root, parent, node, attrval) {
 ATTR.append = function(root, parent, node, attrval) {
 	let data = fnReadFile(root, attrval); //read file data
 	fnRemoveAttr(node, "append", attrval); //remove append attribute
-	data && newText(root, node, format(data, root.data));	
+	data && newText(node, format(data, root.data));	
 	node.nextAttr();
 }
 ATTR.repeat = function(root, parent, node, attrval) {
@@ -220,6 +220,12 @@ exports.init = function(req, res) {
 	res.bin = function(data, type) { //response binary data to client
 		this.setHeader("Cache-Control", "public, max-age=" + _staticage);
 		return this.status(200).send(data, mt[type] || mt.bin, "binary");
+	}
+	res.file = function(file) { //response binary data to client
+		fs.readFile(file, function(err, data) {
+			err ? res.end() : res.bin(data, path.extname(file).substr(1));
+		});
+		return this;
 	}
 
 	//configure response

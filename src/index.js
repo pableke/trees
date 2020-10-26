@@ -33,22 +33,17 @@ const server = http.createServer(function(req, res) {
 	//Static request => res.end()
 	if (pathname.indexOf("/favicon.ico") > -1)
 		return res.end(); //ignore icon request
-	if (pathname.indexOf("/static/") > -1) {
-		return res.end(); //ignore icon request
-		fs.readFile(pathname.substr(1), function(err, data) {
-			err ? res.end() : res.bin(data, path.extname(pathname).substr(1));
-		});
-		return null;
-	}
+	if (pathname.indexOf("/static/") > -1)
+		return trees.init(req, res).file(pathname.substr(1)); //serve static file
 
 	/*let lang = req.params.lang || data.lang || req.headers["accept-language"];
 	if (lang != data.lang) { //has change current language?
 		Object.assign(data, i18n[lang] || i18n[lang.substr(0, 2)] || i18n.es); //add values
 		data.lang = lang.substr(0, 2); //current languagej
 	}*/
-	trees.init(req, res).delete("startSession")
-		.set("lang", "es")
-		.set("steps", [{ pref: "trabajando.html", text: "worcking" }])
+	trees.init(req, res)
+		.delete("startSession").set("lang", "es")
+		.set("steps", [{ pref: "trabajando.html", text: "working" }])
 		.render();
 });
 
