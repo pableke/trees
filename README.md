@@ -17,7 +17,7 @@ Express alternative
 1. Install by npm:
 
     ```sh
-    $ npm install trees
+    $ npm install tree-ss
     ```
 
 </details>
