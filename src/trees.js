@@ -184,15 +184,16 @@ exports.attr = function(name, callback) {
 var _tplIndex;
 //var _maxage = 3600000; //1h in miliseconds
 var _charset = "utf-8"; //default charset
-var _staticage = 604800000; //default = 7dias
+var _staticage = 1000 * 60 * 60 * 24 * 7; //default = 7dias
 
 exports.start = function(opts) {
 	_charset = opts.charset || _charset;
 	_staticage = opts.staticage || _staticage;
-
-	opts.templateIndex && fs.readFile(opts.templateIndex, _charset, (err, data) => {
-		_tplIndex = err || minify(data);
-	});
+	if (opts.templateIndex) {
+		fs.readFile(opts.templateIndex, _charset, (err, data) => {
+			_tplIndex = err || minify(data);
+		});
+	}
 	return this;
 }
 
