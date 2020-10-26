@@ -31,15 +31,18 @@ function format(str, obj) { return str.replace(RE_VAR, function(m, k) { return n
 function parse(str, obj) { return str.replace(RE_VAR, function(m, k) { return nvl(obj[k], EMPTY); }); }
 
 //build and iterator tree
-function newNode(parent, name, value, type, isEmpty) {
+function newNode(root, parent, name, value, type, isEmpty, nodes, attributes) {
 	return { //new child node
 		name: name, valueHtml: value, type: type, 
-		level: parent.level + 1, isEmptyElement: isEmpty, 
-		childnodes: []
+		level: parent.level + 1, isEmptyElement: isEmpty, childnodes: [],
+		nextAttr: function() { readAttrs(root, parent, this, nodes, attributes); },
+		nextNode: function() { readNode(root, parent, nodes); }
 	};
 }
-function newText(parent, value) { //add child to tree
-	parent.childnodes.push(newNode(parent, "#text", value, TYPES.TEXT, true));
+function newText(root, parent, value) { //add child to tree
+	let child = newNode(root, parent, "#text", value, TYPES.TEXT, true);
+	child.nextAttr = child.nextNode; //has no attributes
+	parent.childnodes.push(child); //add child in array
 	parent.valueHtml += value; //build outher html
 	return parent;
 }
@@ -49,7 +52,7 @@ function readAttrs(root, parent, node, nodes, attributes) {
 		if (fn) {
 			attributes.shift(); //=
 			let value = attributes.shift(); //attrvalue
-			fn(root, parent, node, value.substr(1, value.length - 2), nodes, attributes);
+			fn(root, parent, node, value.substr(1, value.length - 2));
 		}
 		else
 			readAttrs(root, parent, node, nodes, attributes);
@@ -58,10 +61,6 @@ function readAttrs(root, parent, node, nodes, attributes) {
 		parent.childnodes.push(node); //push child
 		node.valueHtml += node.isEmptyElement ? "" : ("</" + node.name + ">"); //close child tag
 		parent.valueHtml += node.valueHtml; //add child tag to parent
-console.log("----------------------------------------");
-console.log(parent.name, parent.valueHtml.substr(0, 20) + " ...");
-console.log(node.name, node.valueHtml.substr(0, 20) + " ...");
-console.log("----------------------------------------");
 		readNode(root, parent, nodes); //go sibling
 	}
 	return parent;
@@ -74,20 +73,20 @@ function readNode(root, node, nodes) { //tree
 		if (value.startsWith("</") || (value == "]]>"))
 			return node; //end element tag => close node
 		if (value.startsWith("<!") || value.startsWith("<?")) { //transform node to text
-			newText(node, value.startsWith("<![CDATA[") ? nodes.shift() : value);
+			newText(root, node, value.startsWith("<![CDATA[") ? nodes.shift() : value);
 			readNode(root, node, nodes); //go sibling
 		}
 		else if (value.startsWith("<")) { //new node element for tree
 			let attributes = value.match(RE_ATTRS); //node attributes
 			let name = attributes.shift(); //extract tag name
 			let isEmptyElement = value.endsWith("/>") || (SELF_CLOSING_TAGS.indexOf(name) > -1);
-			let child = newNode(node, name, value, TYPES.ELEMENT, isEmptyElement);
+			let child = newNode(root, node, name, value, TYPES.ELEMENT, isEmptyElement, nodes, attributes);
 			isEmptyElement || readNode(root, child, nodes); //build tree in preorder
 			//execute attributes in postorder, when close element tag
 			readAttrs(root, node, child, nodes, attributes);
 		}
 		else {
-			newText(node, value); //default text
+			newText(root, node, value); //default text
 			readNode(root, node, nodes); //go sibling
 		}
 	}
@@ -104,25 +103,27 @@ function fnRemoveAttr(node, attrname, attrval) {
 	let i = node.valueHtml.indexOf(attrname) - 1; //indeox of previous attribute sapce
 	node.valueHtml = fnRemoveAt(node.valueHtml, i, attrname.length + attrval.length + 4);
 	return node;
-};
-/*function fnReadFile(root, file) {
+}
+function fnReadFile(root, file) {
 	try {
 		return file && minify(fs.readFileSync(file, _charset));
 	} catch (ex) {
-		root.msgError(ex.toString());
+		//root.msgError(ex.toString());
 	}
 	return null;
 }
 function fnLoadFile(root, node, file) {
 	return fnParse(root, node, fnReadFile(root, file));
-}*/
+}
 /************************ HELPERS ************************/
 
 /********************* LOAD ATTRIBUTES ON TAG *********************/
-ATTR.render = function(root, parent, node, attrval, nodes, attributes) { //render node and subtree
-	boolval(attrval) ? readAttrs(root, parent, node, nodes, attributes) : readNode(root, parent, nodes);
+ATTR.render = function(root, parent, node, attrval) { //render node and subtree
+	boolval(attrval) ? node.nextAttr() : node.nextNode();
 }
-ATTR.remove = function(root, parent, node, attrval) { return !boolval(attrval); } //remove node and subtree
+ATTR.remove = function(root, parent, node, attrval) { //remove node and subtree
+	boolval(attrval) ? node.nextNode() : node.nextAttr();
+}
 ATTR.root = function(root, parent, node, attrval, nodes) { //util to html ajax
 	fnRemoveAttr(node, "root", attrval);
 	if (boolval(attrval)) {
@@ -143,37 +144,26 @@ ATTR.contents = function(root, parent, node, attrval, nodes) { //util to html aj
 	fnRemoveAttr(node, "contents", attrval);
 	return true;
 }
-ATTR.import = function(root, parent, node, attrval, nodes, attributes) {
-	readAttrs(root, parent, node, nodes, attributes)
-	//return fnLoadFile(root, fnRemoveAttr(node, "import", attrval), attrval); //add sub-tree
+ATTR.import = function(root, parent, node, attrval) {
+	fnLoadFile(root, fnRemoveAttr(node, "import", attrval), attrval); //add sub-tree
+	node.nextAttr();
 }
-ATTR.append = function(root, parent, node, attrval, nodes, attributes) {
+ATTR.append = function(root, parent, node, attrval) {
+	let data = fnReadFile(root, attrval); //read file data
 	fnRemoveAttr(node, "append", attrval); //remove append attribute
-console.log("---------------- before append -----------------------");
-console.log(parent.name, parent.valueHtml.substr(0, 20) + " ...");
-console.log(node.name, node.valueHtml.substr(0, 20) + " ...");
-console.log("----------------------------------------");
-		fs.readFile(attrval, _charset, (err, data) => {
-console.log("---------------- append -----------------------");
-console.log(parent.name, parent.valueHtml.substr(0, 20) + " ...");
-console.log(node.name, node.valueHtml.substr(0, 20) + " ...");
-console.log("----------------------------------------");
-		newText(node, err || minify(format(data, root.data)));
-		readAttrs(root, parent, node, nodes, attributes); //go next attribute
-		((--root.async) == 0) && root._ready(root.getValue());
-	});
-	root.async++;
+	data && newText(root, node, format(data, root.data));	
+	node.nextAttr();
 }
-ATTR.repeat = function(root, parent, node, attrval, nodes) {
+ATTR.repeat = function(root, parent, node, attrval) {
 	//IMPORTANT! extract repeat attribute to avoid cycles in subtree
 	let html = fnRemoveAttr(node, "repeat", attrval).valueHtml + "</" + node.name + ">";
-	let data = root[attrval] || []; //get array data
+	let data = root.get(attrval) || []; //get array data
 	data.forEach((row, i) => {
 		row.index = i; //index base 0
 		row.count = i + 1; //index base 1
 		readNode(root, parent, parse(html, row).split(RE_NODES));
 	});
-	return false;
+	node.nextNode();
 }
 ATTR.mask = function(root, parent, node, attrval) {
 	let mask = parseInt(attrval) || 0; //force intval
@@ -181,7 +171,7 @@ ATTR.mask = function(root, parent, node, attrval) {
 	node.childnodes = node.childnodes.filter((e, i) => { return (mask >> i) & 1; });
 	node.valueHtml = node.valueHtml.substr(0, node.valueHtml.indexOf(">") + 1);
 	node.childnodes.forEach(e => { node.valueHtml += e.valueHtml; });
-	return true;
+	node.nextAttr();
 }
 /********************* LOAD ATTRIBUTES ON TAG *********************/
 
@@ -218,7 +208,7 @@ exports.init = function(req, res) {
 	res.send = function(data, type, encode) {
 		this.setHeader("Content-Length", Buffer.byteLength(data, encode));
 		return this.setContentType(type).end(data, encode, () => {
-			fnReset(res); //clear childnodes and output
+			fnReset(res); delete res.data; //clear childnodes and output
 			console.log(">", req.url, (Date.now() - mtime) + " ms");
 		});
 	}
@@ -252,13 +242,9 @@ exports.init = function(req, res) {
 	res.isError = function() { return this.data.msgError; } //exists error message
 	res.flushMsgs = function() { return this.msgOk(EMPTY).msgInfo(EMPTY).msgWarn(EMPTY).msgError(EMPTY); }
 	res.getValue = function() { return this.value || this.valueHtml; } //serialized html tree
-	//res.render = function(tpl) { return this.build(tpl).html(this.getValue()); } //response html tree
-	res.ready = function(cb) { this._ready = cb; return this }
+	res.render = function(tpl) { return this.build(tpl).html(this.getValue()); } //response html tree
 	res.build = function(tpl) { //build html tree from tpl or from preload index
-		this.async = 0;
-		/*tpl ? fnLoadFile(res, res, tpl) : */fnParse(res, res, _tplIndex);
-console.log("end build");
-		return this;
+		return tpl ? fnLoadFile(res, res, tpl) : fnParse(res, res, _tplIndex);
 	}
 	res.reset = function() {
 		fnReset(res); //clear childnodes and output

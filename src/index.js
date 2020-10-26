@@ -44,10 +44,12 @@ const server = http.createServer(function(req, res) {
 	/*let lang = req.params.lang || data.lang || req.headers["accept-language"];
 	if (lang != data.lang) { //has change current language?
 		Object.assign(data, i18n[lang] || i18n[lang.substr(0, 2)] || i18n.es); //add values
-		data.lang = lang.substr(0, 2); //current language
+		data.lang = lang.substr(0, 2); //current languagej
 	}*/
-	trees.init(req, res).delete("startSession").set("lang", "es")
-		.build().ready(value => {console.log("ready");res.html(value);});
+	trees.init(req, res).delete("startSession")
+		.set("lang", "es")
+		.set("steps", [{ pref: "trabajando.html", text: "worcking" }])
+		.render();
 });
 
 //capture Node.js Signals and Events
