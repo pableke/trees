@@ -181,10 +181,9 @@ exports.attr = function(name, callback) {
 }
 
 //global config vars
-var _tplIndex;
-//var _maxage = 3600000; //1h in miliseconds
+var _tplIndex; //common index
 var _charset = "utf-8"; //default charset
-var _staticage = 1000 * 60 * 60 * 24 * 7; //default = 7dias
+var _staticage = 1000 * 60 * 60 * 24 * 7; //default = 7days
 
 exports.start = function(opts) {
 	_charset = opts.charset || _charset;
