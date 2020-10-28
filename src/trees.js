@@ -5,18 +5,10 @@ const path = require("path"); //file and directory paths
 const mt = require("./mime-ext"); //extensions mime-types
 
 //regexp to split nodes (auto remove coments multiline) and attributes from input string
-const RE_NODES = /(<!\[CDATA\[)([\s\S]*?)\]\]>|<!--[\s\S]*?-->|(<[^>]*>)/; //split nodes
-const RE_ATTRS = /[\w\-]+|=|"[^"]*"|'[^']*'/g; //attributes selector
-const TYPES = {
-	NONE: 0,
-	DECLARATION: 1,
-	ELEMENT: 2,
-	END_ELEMENT: 3,
-	ATTRIBUTE: 4,
-	TEXT: 5,
-	CDATA: 6,
-	COMMENT: 7
-};
+const RE_NODES = /(<!\[CDATA\[[\s\S]*?\]\]>)|<!--[\s\S]*?-->|(<[^>]*>)/; //split nodes
+const RE_ATTRS = /[\w\-]+|="([\s\S]*?)"|='([\s\S]*?)'/g; //attributes selector
+const TYPE_ELEMENT = 2;
+const TYPE_TEXT = 5;
 
 //containers
 const ATTR = {};
@@ -40,7 +32,7 @@ function newNode(parent, name, value, type, isEmpty) {
 	};
 }
 function newText(parent, value) { //add child to tree
-	parent.childnodes.push(newNode(parent, "#text", value, TYPES.TEXT, true));
+	parent.childnodes.push(newNode(parent, "#text", value, TYPE_TEXT, true));
 	parent.valueHtml += value; //build outher html
 	return parent;
 }
@@ -48,9 +40,8 @@ function readAttrs(root, parent, node, attributes) {
 	if (attributes.length) { //exit recursion?
 		let fn = ATTR[attributes.shift()]; //read attrname
 		if (fn) {
-			attributes.shift(); //=
-			let value = attributes.shift(); //attrvalue
-			fn(root, parent, node, value.substr(1, value.length - 2));
+			let value = attributes.shift(); //attrval: ="XXXXX"
+			fn(root, parent, node, value.substr(2, value.length - 3));
 		}
 		else
 			readAttrs(root, parent, node, attributes);
@@ -68,20 +59,19 @@ function readNode(root, node, nodes) { //tree
 		let value = nodes.shift(); //read node value
 		if (!value) //ignore null's and comments
 			return readNode(root, node, nodes); //go sibling
-		if (value.startsWith("</") || (value == "]]>"))
+		if (value.startsWith("</"))
 			return node; //end element tag => close node
 		if (value.startsWith("<!") || value.startsWith("<?")) { //transform node to text
-			newText(node, value.startsWith("<![CDATA[") ? nodes.shift() : value);
+			newText(node, value.startsWith("<![CDATA[") ? value.substr(9, value.length - 12).trim() : value);
 			readNode(root, node, nodes); //go sibling
 		}
 		else if (value.startsWith("<")) { //new node element for tree
 			let attributes = value.match(RE_ATTRS); //node attributes
 			let name = attributes.shift(); //extract tag name
-			let isEmptyElement = value.endsWith("/>") || (SELF_CLOSING_TAGS.indexOf(name) > -1);
-			let child = newNode(node, name, value, TYPES.ELEMENT, isEmptyElement);
+			let child = newNode(node, name, value, TYPE_ELEMENT, SELF_CLOSING_TAGS.indexOf(name) > -1);
 			child.nextAttr = function() { readAttrs(root, node, child, attributes); }
 			child.nextNode = function() { readNode(root, node, nodes); }
-			isEmptyElement || readNode(root, child, nodes); //build tree in preorder
+			child.isEmptyElement || readNode(root, child, nodes); //build tree in preorder
 			//execute attributes in postorder, when close element tag
 			readAttrs(root, node, child, attributes);
 		}
@@ -209,7 +199,7 @@ exports.init = function(req, res) {
 		this.setHeader("Content-Length", Buffer.byteLength(data, encode));
 		return this.setContentType(type).end(data, encode, () => {
 			fnReset(res); delete res.data; //clear childnodes and output
-			console.log(">", req.url, (Date.now() - mtime) + " ms");
+			console.log(">", req.url, req.method, (Date.now() - mtime) + " ms");
 		});
 	}
 	res.text = function(data) { return this.status(200).send(data, mt.txt, _charset); } //response plain text
