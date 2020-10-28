@@ -5,7 +5,7 @@ const path = require("path"); //file and directory paths
 const mt = require("./mime-ext"); //extensions mime-types
 
 //regexp to split nodes (auto remove coments multiline) and attributes from input string
-const RE_NODES = /(<!\[CDATA\[[\s\S]*?\]\]>)|<!--[\s\S]*?-->|(<[^>]*>)/; //split nodes
+const RE_NODES = /(<!\[CDATA\[[\s\S]*?\]\]>)|<!--[\s\S]*?-->|(<[^>]*>)|[^<]+/g; //nodes selector
 const RE_ATTRS = /[\w\-]+|="([\s\S]*?)"|='([\s\S]*?)'/g; //attributes selector
 const TYPE_ELEMENT = 2;
 const TYPE_TEXT = 5;
@@ -57,7 +57,7 @@ function readAttrs(root, parent, node, attributes) {
 function readNode(root, node, nodes) { //tree
 	if (nodes.length) { //exit recursion?
 		let value = nodes.shift(); //read node value
-		if (!value) //ignore null's and comments
+		if (!value || value.startsWith("<!--")) //ignore null and comments
 			return readNode(root, node, nodes); //go sibling
 		if (value.startsWith("</"))
 			return node; //end element tag => close node
@@ -87,7 +87,7 @@ function readNode(root, node, nodes) { //tree
 /************************ HELPERS ************************/
 function boolval(val) { return (val && (val != "false") && (val != "0")); };
 function fnReset(res) { res.childnodes.splice(0); delete this.value; delete this.valueHtml; } //clear childnodes and output
-function fnParse(root, node, text) { return text ? readNode(root, node, format(text, root.data).split(RE_NODES)) : node; }
+function fnParse(root, node, text) { return text ? readNode(root, node, format(text, root.data).match(RE_NODES)) : node; }
 function fnRemoveAt(str, i, n) { return /*(i < 0) ? str :*/ str.substr(0, i) + str.substr(i + n); };
 function fnRemoveAttr(node, attrname, attrval) {
 	let i = node.valueHtml.indexOf(attrname) - 1; //indeox of previous attribute sapce
@@ -151,7 +151,7 @@ ATTR.repeat = function(root, parent, node, attrval) {
 	data.forEach((row, i) => {
 		row.index = i; //index base 0
 		row.count = i + 1; //index base 1
-		readNode(root, parent, parse(html, row).split(RE_NODES));
+		readNode(root, parent, parse(html, row).match(RE_NODES));
 	});
 	node.nextNode();
 }
@@ -198,7 +198,7 @@ exports.init = function(req, res) {
 	res.send = function(data, type, encode) {
 		this.setHeader("Content-Length", Buffer.byteLength(data, encode));
 		return this.setContentType(type).end(data, encode, () => {
-			fnReset(res); delete res.data; //clear childnodes and output
+			fnReset(res); delete res.childnodes; delete res.data; //clear childnodes and output
 			console.log(">", req.url, req.method, (Date.now() - mtime) + " ms");
 		});
 	}
