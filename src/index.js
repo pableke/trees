@@ -5,14 +5,9 @@ const url = require("url"); //url parser
 const trees = require("./trees"); //server DOM parser
 
 // Settings
-/*const i18n = { //aviable languages list
-	"es": require("./i18n/es.js"), 
-	"en": require("./i18n/en.js")
-};*/
-
 trees.start({
 	templateIndex: __dirname + "/views/index.html", //template index
-	staticage: 604800000, //default = 7dias
+	staticage: 1000 * 60 * 60 * 24 * 7, //default = 7days
 	charset: "utf-8"
 });
 
@@ -34,13 +29,10 @@ const server = http.createServer(function(req, res) {
 	if (pathname.indexOf("/static/") > -1)
 		return trees.init(req, res).file(pathname.substr(1)); //serve static file
 
-	/*let lang = req.params.lang || data.lang || req.headers["accept-language"];
-	if (lang != data.lang) { //has change current language?
-		Object.assign(data, i18n[lang] || i18n[lang.substr(0, 2)] || i18n.es); //add values
-		data.lang = lang.substr(0, 2); //current languagej
-	}*/
+	var time = new Date(); //sysdate
 	trees.init(req, res)
-		.delete("startSession").set("lang", "es")
+		.delete("startSession").set("lang", "es").copy("lastClick", "sysdate") //prev click
+		.set("sysdate", time).set("mtime", time.getTime()).set("yyyy", time.getFullYear())
 		.set("steps", [{ pref: "trabajando.html", text: "working" }])
 		.render();
 });

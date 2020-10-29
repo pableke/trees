@@ -176,6 +176,7 @@ var _charset = "utf-8"; //default charset
 var _staticage = 1000 * 60 * 60 * 24 * 7; //default = 7days
 
 exports.start = function(opts) {
+	opts = opts || {}; //init config
 	_charset = opts.charset || _charset;
 	_staticage = opts.staticage || _staticage;
 	if (opts.templateIndex) {
@@ -187,8 +188,7 @@ exports.start = function(opts) {
 }
 
 exports.init = function(req, res) {
-	var time = new Date(); //sysdate
-	var mtime = time.getTime(); //microtime
+	var mtime = Date.now(); //microtime
 
 	//extends responses
 	res.status = function(status) { this.statusCode = status; return this; }
@@ -250,7 +250,6 @@ exports.init = function(req, res) {
 
 	res.level = 0; //deep level
 	res.childnodes = []; //child container
-	res.data = res.data || {}; //initialize data container
-	return res.reset().set("charset", _charset).copy("lastClick", "sysdate") //reset + prev click
-				.set("sysdate", time).set("mtime", mtime).set("yyyy", time.getFullYear()); //sysdate
+	res.data = req.session || {}; //initialize data container
+	return res.reset().set("charset", _charset);
 }

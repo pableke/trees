@@ -30,10 +30,9 @@ Tree-Ss cahe index template, charset and static file age
 1. trees.start():
 
 	```
-	const trees = require("tree-ss"); //server DOM parser
-	trees.start({ //config charset and preload index template
+	trees.start({
 		templateIndex: __dirname + "/views/index.html", //template index
-		staticage: 604800000, //default = 7days
+		staticage: 1000 * 60 * 60 * 24 * 7, //default = 7days
 		charset: "utf-8"
 	});
 	```
