@@ -17,7 +17,7 @@ An express alternative
 
 1. Install by npm:
 
-    ```sh
+    ```
     $ npm install tree-ss
     ```
 
@@ -25,7 +25,7 @@ An express alternative
 
 ## Config
 
-Tree-Ss cahe index template, charset and static file age
+Tree-Ss cache index template, charset and static file age
 
 1. trees.start():
 
