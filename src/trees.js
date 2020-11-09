@@ -221,6 +221,14 @@ exports.init = function(req, res) {
 	res.get = function(name) { return this.data[name]; }
 	res.set = function(name, value) { this.data[name] = value; return this; }
 	res.add = function(data) { Object.assign(this.data, data); return this; }
+	res.addBySuffix = function(data, suffix) {
+		if (!suffix)
+			return this.add(data);
+		for (let k in data)
+			this.data[k + suffix] = data[k];
+		return this;
+	}
+
 	res.nvl = function(name, value) { return this.set(name, nvl(this.data[name], value)); }
 	res.ifFalse = function(name, value) { return this.data[name] ? this : this.set(name, value); }
 	res.copy = function(name, key) { return this.set(name, this.data[key] || EMPTY); }
