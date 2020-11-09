@@ -230,10 +230,9 @@ exports.init = function(req, res) {
 	}
 
 	res.nvl = function(name, value) { return this.set(name, nvl(this.data[name], value)); }
-	res.ifFalse = function(name, value) { return this.data[name] ? this : this.set(name, value); }
 	res.copy = function(name, key) { return this.set(name, this.data[key] || EMPTY); }
 	res.flush = function(name) { return this.set(name, EMPTY); }
-	res.delete = function(name) { delete this.data[name]; return this.flush(name); }
+	res.delete = function(name) { delete this.data[name]; return this; }
 	res.msgOk = function(msg) { this.data.msgOk = msg; return this; }
 	res.i18nOk = function(key) { return this.msgOk(this.data[key]); }
 	res.msgInfo = function(msg) { this.data.msgInfo = msg; return this; }

@@ -31,7 +31,7 @@ const server = http.createServer(function(req, res) {
 
 	var time = new Date(); //sysdate
 	trees.init(req, res)
-		.delete("startSession").set("lang", "es").copy("lastClick", "sysdate") //prev click
+		.flush("startSession").set("lang", "es").copy("lastClick", "sysdate") //prev click
 		.set("sysdate", time).set("mtime", time.getTime()).set("yyyy", time.getFullYear())
 		.set("steps", [{ pref: "trabajando.html", text: "working" }])
 		.render();
