@@ -204,7 +204,8 @@ exports.init = function(req, res) {
 	}
 	res.text = function(data) { return this.status(200).send(data, mt.txt, _charset); } //response plain text
 	res.error = function(data) { return this.status(500).send(data, mt.txt, _charset); } //response error text
-	res.json = function(data) { return this.status(200).send(JSON.stringify(data), mt.json, _charset); } //response data as json
+	res.json = function(data) { return this.status(200).send(JSON.stringify(data), mt.json, _charset); } //response json data
+	res.jerr = function(data) { return this.status(500).send(JSON.stringify(data), mt.json, _charset); } //response error json
 	res.html = function(data) { return this.status(200).send(data, mt.html, _charset); } //response data as html
 	res.bin = function(data, type) { //response binary data to client
 		this.setHeader("Cache-Control", "public, max-age=" + _staticage);
