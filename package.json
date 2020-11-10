@@ -1,11 +1,11 @@
 {
   "name": "tree-ss",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "HTML DOM parser in server side",
   "main": "./src/trees.js",
   "scripts": {
     "dev": "nodemon ./src/index.js",
-    "zip": "rm tree.zip & npm-pack-zip",
+    "zip": "rm tree.zip & npm-pack-zip & npm pack",
     "test": "node ./src/index.js"
   },
   "keywords": [

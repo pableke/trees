@@ -19,7 +19,7 @@ const SELF_CLOSING_TAGS = ["area", "base", "br", "col", "command", "embed", "hr"
 //helpers
 function isset(val) { return (typeof val != "undefined") && (val != null); }
 function nvl(val, def) { return isset(val) ? val : def; }
-function minify(str) { return str ? str.trim().replace(/>\s+</g, "><") : str; }
+//function minify(str) { return str ? str.trim().replace(/>\s+</g, "><") : str; }
 function format(str, obj) { return str.replace(RE_VAR, function(m, k) { return nvl(obj[k], m); }); }
 function parse(str, obj) { return str.replace(RE_VAR, function(m, k) { return nvl(obj[k], EMPTY); }); }
 
@@ -62,7 +62,7 @@ function readNode(root, node, nodes) { //tree
 		if (value.startsWith("</"))
 			return node; //end element tag => close node
 		if (value.startsWith("<!") || value.startsWith("<?")) { //transform node to text
-			newText(node, value.startsWith("<![CDATA[") ? value.substr(9, value.length - 12).trim() : value);
+			newText(node, value.startsWith("<![CDATA[") ? value.substr(9, value.length - 12) : value);
 			readNode(root, node, nodes); //go sibling
 		}
 		else if (value.startsWith("<")) { //new node element for tree
@@ -96,7 +96,7 @@ function fnRemoveAttr(node, attrname, attrval) {
 }
 function fnReadFile(root, file) {
 	try {
-		return file && minify(fs.readFileSync(file, _charset));
+		return file && fs.readFileSync(file, _charset); //minify(fs.readFileSync(file, _charset));
 	} catch (ex) {
 		//root.msgError(ex.toString());
 	}
@@ -181,7 +181,7 @@ exports.start = function(opts) {
 	_staticage = opts.staticage || _staticage;
 	if (opts.templateIndex) {
 		fs.readFile(opts.templateIndex, _charset, (err, data) => {
-			_tplIndex = err || minify(data);
+			_tplIndex = err || data; //minify(data);
 		});
 	}
 	return this;
