@@ -5,7 +5,7 @@
   "main": "./src/trees.js",
   "scripts": {
     "dev": "nodemon ./src/index.js",
-    "zip": "rm tree.zip & npm-pack-zip & npm pack",
+    "zip": "rm *.zip & rm *.tgz & npm-pack-zip & npm pack",
     "test": "node ./src/index.js"
   },
   "keywords": [
