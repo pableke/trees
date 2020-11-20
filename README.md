@@ -11,7 +11,7 @@ Build an HTML DOM in server side and response it to client.
 
 ### JS Applications
 
-An express alternative
+An express alternative framework
 
 <details><summary><b>Show instructions</b></summary>
 
