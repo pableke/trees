@@ -222,7 +222,7 @@ exports.init = function(req, res) {
 	res.get = function(name) { return this.data[name]; }
 	res.set = function(name, value) { this.data[name] = value; return this; }
 	res.add = function(data) { Object.assign(this.data, data); return this; }
-	res.addBySuffix = function(data, suffix) {
+	res.addSuffix = function(data, suffix) {
 		if (!suffix)
 			return this.add(data);
 		for (let k in data)
