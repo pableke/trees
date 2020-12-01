@@ -1,6 +1,6 @@
 {
   "name": "tree-ss",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "HTML DOM parser in server side",
   "main": "./src/trees.js",
   "scripts": {
