@@ -234,17 +234,6 @@ exports.init = function(req, res) {
 	res.copy = function(name, key) { return this.set(name, this.data[key] || EMPTY); }
 	res.flush = function(name) { return this.set(name, EMPTY); }
 	res.delete = function(name) { delete this.data[name]; return this; }
-	res.msgOk = function(msg) { this.data.msgOk = msg; return this; }
-	res.i18nOk = function(key) { return this.msgOk(this.data[key]); }
-	res.msgInfo = function(msg) { this.data.msgInfo = msg; return this; }
-	res.i18nInfo = function(key) { return this.msgInfo(this.data[key]); }
-	res.msgWarn = function(msg) { this.data.msgWarn = msg; return this; }
-	res.i18nWarn = function(key) { return this.msgWarn(this.data[key]); }
-	res.msgError = function(msg) { this.data.msgError = msg; return this; }
-	res.i18nError = function(key) { return this.msgError(this.data[key]); }
-	res.isOk = function() { return !this.data.msgError; } //not exists error message
-	res.isError = function() { return this.data.msgError; } //exists error message
-	res.flushMsgs = function() { return this.msgOk(EMPTY).msgInfo(EMPTY).msgWarn(EMPTY).msgError(EMPTY); }
 	res.getValue = function() { return this.value || this.valueHtml; } //serialized html tree
 	res.render = function(tpl) { return this.build(tpl).html(this.getValue()); } //response html tree
 	res.build = function(tpl) { //build html tree from tpl or from preload index
